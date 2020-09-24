@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="400" prefWidth="550" style="-fx-background-color: azure" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LogInController">
+    <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0" />
+    </columnConstraints>
+    <rowConstraints>
+      <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="235.0" percentHeight="45.0" vgrow="SOMETIMES" />
+        <RowConstraints percentHeight="35.0" vgrow="SOMETIMES" />
+    </rowConstraints>
+     <Label alignment="CENTER" contentDisplay="CENTER" text="Fancy Picnics" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+         <font>
+             <Font size="36.0" />
+         </font>
+     </Label>
+   <ImageView fitHeight="235.0" fitWidth="314.0" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+       <Image url="@../images/fancy-picnics.jpg" />
+   </ImageView>
+    <GridPane GridPane.rowIndex="2">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" percentWidth="100.0"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints percentHeight="20.0" vgrow="SOMETIMES"/>
+            <RowConstraints percentHeight="20.0" vgrow="SOMETIMES"/>
+            <RowConstraints percentHeight="20.0" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" percentHeight="40.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+        </rowConstraints>
+        <Label text="Log-In" GridPane.halignment="CENTER" GridPane.valignment="TOP">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+        <Label text="Username:" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+         <font>
+             <Font size="16.0"/>
+         </font>
+         <GridPane.margin>
+             <Insets right="125.0"/>
+         </GridPane.margin>
+        </Label>
+        <TextField fx:id="usernameField" maxWidth="125.0" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+         <GridPane.margin>
+             <Insets left="125.0"/>
+         </GridPane.margin>
+        </TextField>
+        <Label text="Password:" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+         <font>
+             <Font size="16.0"/>
+         </font>
+         <GridPane.margin>
+             <Insets right="125.0"/>
+         </GridPane.margin>
+        </Label>
+        <PasswordField fx:id="passwordField" maxWidth="125.0" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+         <GridPane.margin>
+             <Insets left="125.0"/>
+         </GridPane.margin>
+        </PasswordField>
+        <JFXButton maxWidth="100.0" onAction="#enterButtonPressed" style="-fx-background-color: rgba(167,167,167,0.51)"
+                   text="Enter" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+            <font>
+                <Font size="14.0"/>
+            </font>
+         <GridPane.margin>
+             <Insets bottom="20.0"/>
+         </GridPane.margin>
+        </JFXButton>
+    </GridPane>
+</GridPane>

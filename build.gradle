@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+}
+
+group 'com.consltiq'
+version '09.20.2020'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+
+dependencies {
+    compile group: 'com.oracle.database.jdbc', name: 'ojdbc8', version: '19.7.0.0'
+    compile "com.microsoft.sqlserver:sqljdbc4:4.0"
+    compile 'com.jfoenix:jfoenix:8.0.10'
+    compile group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
+    compile 'com.google.api-client:google-api-client:1.23.0'
+    compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+    compile 'com.google.apis:google-api-services-gmail:v1-rev83-1.23.0'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.8.3'
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+}
+
+jar{
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+
+    manifest{
+        attributes(
+                'Main-Class': 'Main',
+        )
+    }
+}
+
+
