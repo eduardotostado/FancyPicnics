@@ -4,7 +4,7 @@ import java.sql.*;
 
 public abstract class QueryObject {
 
-    protected final static String connectionURL = "jdbc:sqlserver://ec2-34-200-224-73.compute-1.amazonaws.com:1433;databaseName=FANCYPICNICS;user=JavaUser;password=consltiq";
+    protected final static String connectionURL = "jdbc:sqlserver://*******.compute-1.amazonaws.com:1433;databaseName=******;user=*****;password=******";
 
     protected static String statement;
     protected static Connection conn = null;
