@@ -4,17 +4,22 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXDatePicker;
 import entities.Controller;
 
+import entities.ControllerType;
 import entities.GmailService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
+
 import models.SquareEmail;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
@@ -48,7 +53,7 @@ public class EmailController extends Controller implements Initializable {
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem menuItem1 = new MenuItem("Generate Invoice");
-        menuItem1.setOnAction(event -> generateInvoice() );
+        menuItem1.setOnAction(this::generateInvoice);
         MenuItem menuItem2 = new MenuItem("Ignore Email");
         menuItem2.setOnAction(event -> ignoreEmail() );
 
@@ -77,49 +82,78 @@ public class EmailController extends Controller implements Initializable {
         column5.setCellValueFactory(new PropertyValueFactory<>("eventGuestCount"));
     }
 
-    public void reloadTablePushed(){
+    public void reloadTablePushed() throws InterruptedException {
         GmailService gmail = new GmailService();
         LocalDate from = dpFrom.getValue();
         LocalDate to = dpTo.getValue().plusDays(1);
         int maxEmails = cbMaxEmails.getValue();
 
-        JFrame frame = new JFrame("Loading");
-        ImageIcon loading = new ImageIcon("ajax-loader.gif");
-        frame.add(new JLabel("loading...", loading, JLabel.CENTER));
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 150);
+
+        JFrame frame = new JFrame("");
+        URL url = getClass().getResource("/images/ajax-loader.gif");
+        Icon icon = new ImageIcon(url);
+        frame.add(new JLabel("", icon, JLabel.CENTER));
+
+        frame.setSize(icon.getIconWidth(), icon.getIconWidth());
+        double xCord = window.getX() + (window.getWidth() / 2) - (icon.getIconWidth() / 2.0);
+        double yCord = window.getY() + (window.getHeight() / 2) + (icon.getIconHeight());
+        frame.setLocation((int)xCord, (int)yCord);
+        frame.setUndecorated(true);
+        frame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
         frame.setVisible(true);
+        frame.toFront();
 
         Task<Boolean> fetchEmails = new Task<Boolean>() {
             @Override
-            protected Boolean call() throws Exception {
+            protected Boolean call()  {
                 squareEmailObservableList = FXCollections.observableList(gmail.getEmails(from, to, maxEmails));
-                if (!squareEmailObservableList.isEmpty())
-                    tableView.setItems(squareEmailObservableList);
-                else {
-                    tableView.getItems().clear();
-                    warningAlert.setContentText("No new emails found for the selected date.");
-                    warningAlert.showAndWait();
-                }
-                frame.setVisible(false);
-                return true;
+                return null;
             }
         };
 
-        new Thread(fetchEmails).start();
+        Thread loadData = new Thread(fetchEmails);
+        loadData.start();
+        loadData.join();
+        frame.setVisible(false);
 
-
+        if (!squareEmailObservableList.isEmpty()) {
+            tableView.setItems(squareEmailObservableList);
+        }
+        else {
+            tableView.getItems().clear();
+            warningAlert.setContentText("No new emails found for the selected date.");
+            warningAlert.showAndWait();
+        }
     }
 
-    private void generateInvoice(){
-        // Pre-populate add invoice screen.
-        selectedSquareEmail = selectedObject;
+    private void generateInvoice(ActionEvent event){
+        if(selectedObject != null) {
+            selectedSquareEmail = selectedObject;
+            try {
+                loadEventScene((Stage) dpFrom.getScene().getWindow(), "/views/AddEvent.fxml", ControllerType.ADD_EVENT, true, true, null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    private void ignoreEmail(){
-        // Check if fake invoice exists else create fake invoice
-        // Create square email with fake invoice id
+    private void ignoreEmail() {
+        if(selectedObject != null) {
+            confirmationAlert.showAndWait().filter(response -> response == ButtonType.OK).ifPresent(response -> {
+                selectedSquareEmail = selectedObject;
+                selectedSquareEmail.setIsIgnored(true);
+                selectedSquareEmail.add();
+                squareEmailObservableList.remove(selectedObject);
+                tableView.refresh();
+                clearSelectedObjects();
+            });
+        }
+    }
+
+    public void resetIgnoresPushed() throws InterruptedException {
+        SquareEmail.resetIgnoredEmails(dpFrom.getValue().toString(), dpTo.getValue().plusDays(1).toString());
+        reloadTablePushed();
     }
 }
 

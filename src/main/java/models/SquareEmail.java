@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public class SquareEmail extends QueryObject {
     private String id;
     private Date emailDate;
-    private int invoiceId;
+    private boolean isIgnored;
 
     private String eventName;
     private String eventEmail;
@@ -21,17 +22,18 @@ public class SquareEmail extends QueryObject {
     private String eventDate;
     private String eventTime;
     private String eventGuestCount;
-    private String[] eventLocationArray;
+    private String eventLocation;
     private String eventAddress;
-    private String[] eventTypeArray;
-    private String[] eventStyleArray;
+    private String eventType;
+    private String eventStyle;
     private String[] eventAddonsArray;
+    private String customPalette;
+    private String marqueeLetters;
 
-
-    public SquareEmail(String id, Date emailDate, int invoiceId) {
+    public SquareEmail(String id, Date emailDate, boolean isIgnored) {
         setId(id);
         setEmailDate(emailDate);
-        setInvoiceId(invoiceId);
+        setIsIgnored(isIgnored);
     }
 
     public SquareEmail() {
@@ -39,29 +41,31 @@ public class SquareEmail extends QueryObject {
     }
 
     public boolean add(){
-        statement = "INSERT INTO square_email (id, email_date) VALUES ('" +
-                this.getId() + "', '" + this.getEmailDate() + "', " +
+        statement = "INSERT INTO square_email (id, email_date, is_ignored) VALUES (" +
+                (this.getId() == null ? this.getId() : "'" + this.getId().replaceAll("'","''") + "'") + ", " +
+                "'" +this.getEmailDateFormatted() + "', " +
+                this.getIsIgnoredBit() +
                 ")";
         return executeUpdate(statement);
     }
 
     public boolean update(){
-        statement = "UPDATE square_email SET invoice_id = " + this.getInvoiceId() +
-                " WHERE id = " + this.getId();
+        statement = "UPDATE square_email SET is_ignored = " + this.getIsIgnoredBit() +
+                " WHERE id = " + (this.getId() == null ? this.getId() : "'" + this.getId().replaceAll("'","''") + "'") + ";";
         return executeUpdate(statement);
     }
 
     public boolean delete(){
         statement =
-                "DELETE FROM square_email WHERE id = '" +
-                        this.getId() + "'";
+                "DELETE FROM square_email WHERE id = " +
+                        (this.getId() == null ? this.getId() : "'" + this.getId().replaceAll("'","''") + "'") + ";";
         return executeUpdate(statement);
     }
 
     public static ObservableList<SquareEmail> findAll(){
         List<SquareEmail> squareEmails = new ArrayList<>();
         try {
-            statement = "SELECT id, email_date, invoice_id FROM square_email";
+            statement = "SELECT id, email_date, is_ignored FROM square_email";
             executeQuery(statement);
             while(resultSet.next()) {
                 SquareEmail squareEmail = new SquareEmail();
@@ -79,7 +83,7 @@ public class SquareEmail extends QueryObject {
     public SquareEmail findByID(String id){
         SquareEmail squareEmail = new SquareEmail();
         try {
-            statement = "SELECT id, email_date, invoice_id FROM square_email WHERE id = '" + id + "'";
+            statement = "SELECT id, email_date, is_ignored FROM square_email WHERE id = " + (this.getId() == null ? this.getId() : "'" + this.getId().replaceAll("'","''") + "'") + ";";
             executeQuery(statement);
             if (resultSet.next()) {
                 setUserFromQuery(squareEmail);
@@ -110,6 +114,11 @@ public class SquareEmail extends QueryObject {
         return idList;
     }
 
+    public static void resetIgnoredEmails(String begDate, String endDate){
+            statement = "DELETE FROM square_email WHERE is_ignored = 1 AND email_date BETWEEN '" + begDate + "' AND '" + endDate +"'";
+            executeUpdate(statement);
+    }
+
     public String getId(){
         return this.id;
     }
@@ -126,12 +135,21 @@ public class SquareEmail extends QueryObject {
         this.emailDate = emailDate;
     }
 
-    public int getInvoiceId(){
-        return this.invoiceId;
+    public String getEmailDateFormatted(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return simpleDateFormat.format(this.emailDate);
     }
 
-    public void setInvoiceId(int invoiceId){
-        this.invoiceId = invoiceId;
+    public boolean getIsIgnored(){
+        return this.isIgnored;
+    }
+
+    public int getIsIgnoredBit(){
+        return isIgnored ? 1 : 0;
+    }
+
+    public void setIsIgnored(boolean isIgnored){
+        this.isIgnored = isIgnored;
     }
 
     public String getEventName() {
@@ -190,12 +208,12 @@ public class SquareEmail extends QueryObject {
         this.eventGuestCount = eventGuestCount;
     }
 
-    public String[] getEventLocationArray() {
-        return eventLocationArray;
+    public String getEventLocation() {
+        return eventLocation;
     }
 
-    public void setEventLocationArray(String[] eventLocationArray) {
-        this.eventLocationArray = eventLocationArray;
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation;
     }
 
     public String getEventAddress() {
@@ -206,20 +224,20 @@ public class SquareEmail extends QueryObject {
         this.eventAddress = eventAddress;
     }
 
-    public String[] getEventTypeArray() {
-        return eventTypeArray;
+    public String getEventType() {
+        return eventType;
     }
 
-    public void setEventTypeArray(String[] eventTypeArray) {
-        this.eventTypeArray = eventTypeArray;
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 
-    public String[] getEventStyleArray() {
-        return eventStyleArray;
+    public String getEventStyle() {
+        return eventStyle;
     }
 
-    public void setEventStyleArray(String[] eventStyleArray) {
-        this.eventStyleArray = eventStyleArray;
+    public void setEventStyle(String eventStyle) {
+        this.eventStyle = eventStyle;
     }
 
     public String[] getEventAddonsArray() {
@@ -230,6 +248,22 @@ public class SquareEmail extends QueryObject {
         this.eventAddonsArray = eventAddonsArray;
     }
 
+    public String getCustomPalette() {
+        return customPalette;
+    }
+
+    public void setCustomPalette(String customPalette) {
+        this.customPalette = customPalette;
+    }
+
+    public String getMarqueeLetters() {
+        return marqueeLetters;
+    }
+
+    public void setMarqueeLetters(String marqueeLetters) {
+        this.marqueeLetters = marqueeLetters;
+    }
+
     public boolean exists() {
         return (findByID(id) != null);
     }
@@ -237,7 +271,7 @@ public class SquareEmail extends QueryObject {
     private static void setUserFromQuery(SquareEmail squareEmail) throws SQLException {
         squareEmail.setId(resultSet.getString("id"));
         squareEmail.setEmailDate(resultSet.getDate("email_date"));
-        squareEmail.setInvoiceId(resultSet.getInt("invoice_id"));
+        squareEmail.setIsIgnored(resultSet.getBoolean("is_ignored"));
     }
 
     public static int getChecksum(){

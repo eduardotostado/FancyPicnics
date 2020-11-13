@@ -31,24 +31,26 @@ public class UserAccount extends QueryObject {
 
         statement = "UPDATE user_account " +
                 "SET " +
-                "password = '" + this.getPassword() +  "', " +
+                "password = " + (this.getPassword() == null ? this.getPassword() : "'" + this.getPassword().replaceAll("'","''") + "'") + ", " +
                 "employee_id = " + this.getEmployeeID() + " " +
-                "WHERE username = '" + this.getUsername() + "'";
+                "WHERE username = " + (this.getUsername() == null ? this.getUsername() : "'" + this.getUsername().replaceAll("'","''") + "'") + ";";
 
         return executeUpdate(statement);
     }
 
     public boolean add(){
-        statement = "INSERT INTO user_account (username, password, employee_id) VALUES ('" +
-                this.getUsername() + "', '" + this.getPassword() + "', " + this.getEmployee().getID() +
+        statement = "INSERT INTO user_account (username, password, employee_id) VALUES (" +
+                (this.getUsername() == null ? this.getUsername() : "'" + this.getUsername().replaceAll("'","''") + "'") + ", " +
+                (this.getPassword() == null ? this.getPassword() : "'" + this.getPassword().replaceAll("'","''") + "'") + ", " +
+                this.getEmployee().getID() +
                 ")";
         return executeUpdate(statement);
     }
 
     public boolean delete(){
         statement =
-                "DELETE FROM user_account WHERE username = '" +
-                        this.getUsername() + "'";
+                "DELETE FROM user_account WHERE username = " +
+                        (this.getUsername() == null ? this.getUsername() : "'" + this.getUsername().replaceAll("'","''") + "'") + ";";
         return executeUpdate(statement);
     }
 

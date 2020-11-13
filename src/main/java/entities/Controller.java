@@ -1,7 +1,11 @@
 package entities;
 
+import controllers.AddEventController;
+
+import controllers.EventController;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -11,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import models.Employee;
+import models.Event;
 import models.SquareEmail;
 import models.UserAccount;
 
@@ -38,6 +43,15 @@ public abstract class Controller{
     protected static ObservableList<SquareEmail> squareEmailObservableList;
     protected static SquareEmail selectedSquareEmail;
 
+    protected static ObservableList<Event> eventObservableList;
+    protected static Event selectedEvent;
+
+    protected static Stage window;
+
+    @FXML public void exitApplication(ActionEvent event){
+
+    }
+
     public void mainMenuPushed(ActionEvent event) throws IOException {
         loadScene(event, "/views/MainMenu.fxml", ControllerType.MAIN_MENU);
     }
@@ -59,12 +73,26 @@ public abstract class Controller{
                 PREF_WIDTH = 600;
                 break;
             }
+            case EVENT: {
+                MIN_HEIGHT = 600;
+                MIN_WIDTH = 600;
+                PREF_HEIGHT = 600;
+                PREF_WIDTH = 900;
+                break;
+            }
+            case REPORTS:{
+                MIN_HEIGHT = 500;
+                MIN_WIDTH = 600;
+                PREF_HEIGHT = 500;
+                PREF_WIDTH = 600;
+                break;
+            }
 
             default:
                 break;
         }
         Scene scene  = new Scene(parent, PREF_WIDTH, PREF_HEIGHT);
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.setScene(scene);
         window.setMinHeight(MIN_HEIGHT);
         window.setMinWidth(MIN_WIDTH);
@@ -93,17 +121,8 @@ public abstract class Controller{
                 break;
             }
 
-            case ADD_INVOICE: {
-             //   CustomerController controller = loader.getController();
-             //   controller.setSelectedEmail(selectedSquareEmail);
-                MIN_HEIGHT = 500;
-                MIN_WIDTH = 500;
-                PREF_HEIGHT = 500;
-                PREF_WIDTH = 500;
-                break;
-            }
-
             default:
+
                 break;
         }
         Scene scene  = new Scene(parent, PREF_WIDTH, PREF_HEIGHT);
@@ -115,6 +134,42 @@ public abstract class Controller{
         childWindow.initStyle(StageStyle.DECORATED);
         childWindow.initModality(Modality.WINDOW_MODAL);
         childWindow.initOwner(parentWindow);
+        parentWindow.toFront();
+        childWindow.show();
+    }
+
+    protected void loadEventScene(Stage parentWindow, String file, ControllerType type, boolean isNew, boolean isImport, EventController eventController) throws IOException{
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource(file));
+        Parent parent = loader.load();
+
+        switch (type){
+            case ADD_EVENT: {
+                AddEventController controller = loader.getController();
+                controller.setIsNew(isNew);
+                controller.setIsImport(isImport);
+                if(eventController != null)
+                    controller.setParentController(eventController);
+                MIN_HEIGHT = 600;
+                MIN_WIDTH = 600;
+                PREF_HEIGHT = 900;
+                PREF_WIDTH = 900;
+                break;
+            }
+
+            default:
+                break;
+        }
+        Scene scene  = new Scene(parent, PREF_WIDTH, PREF_HEIGHT);
+        Stage childWindow = new Stage();
+
+        childWindow.setScene(scene);
+        childWindow.setMinHeight(MIN_HEIGHT);
+        childWindow.setMinWidth(MIN_WIDTH);
+        childWindow.initStyle(StageStyle.DECORATED);
+        childWindow.initModality(Modality.WINDOW_MODAL);
+        childWindow.initOwner(parentWindow);
+
         parentWindow.toFront();
         childWindow.show();
     }

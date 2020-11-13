@@ -33,31 +33,25 @@ public class Customer extends QueryObject {
 
         statement = "UPDATE customer " +
                 "SET " +
-                "name = '" + this.getName() +  "', " +
-                "phone = '" + this.getPhone() +  "', " +
-                "source = '" + this.getSource() +  "', " +
-                "email = '" + this.getEmail() +  "' " +
+                "name = " + (this.getName() == null ? this.getName() : "'" + this.getName().replaceAll("'","''") + "'") + ", " +
+                "phone = " + (this.getPhone() == null ? this.getPhone() : "'" + this.getPhone().replaceAll("'","''") + "'") + ", " +
+                "source = " + (this.getSource() == null ? this.getSource() : "'" + this.getSource().replaceAll("'","''") + "'") + ", " +
+                "email = " + (this.getEmail() == null ? this.getEmail() : "'" + this.getEmail().replaceAll("'","''") + "'") + " " +
                 "WHERE id = " + this.getID();
 
         return executeUpdate(statement);
     }
 
     public boolean add(){
-        statement = "INSERT INTO customer (name, phone, source, email) VALUES ('" +
-                this.getName() + "', '" + this.getPhone() +  "', '" + this.getSource() + "', '" + this.getEmail() +
-                "')";
+        statement = "INSERT INTO customer (name, phone, source, email) VALUES (" +
+                (this.getName() == null ? this.getName() : "'" + this.getName().replaceAll("'","''") + "'") + ", " +
+                (this.getPhone() == null ? this.getPhone() : "'" + this.getPhone().replaceAll("'","''") + "'") + ", " +
+                (this.getSource() == null ? this.getSource() : "'" + this.getSource().replaceAll("'","''") + "'") + ", " +
+                (this.getEmail() == null ? this.getEmail() : "'" + this.getEmail().replaceAll("'","''") + "'") +
+                ")";
 
         return executeUpdate(statement);
     }
-
-    /* Disabled because we don't want to delete customers given that they might be referenced in other tables.
-     private boolean delete(){
-        statement =
-                "DELETE FROM employee WHERE id = " +
-                        this.getID();
-        return executeUpdate(statement);
-    }
-    */
 
     public static ObservableList<Customer> findAll(){
         List<Customer> customers = new ArrayList<>();
@@ -98,7 +92,8 @@ public class Customer extends QueryObject {
     public static Customer findByEmail(String email){
         Customer customer = new Customer();
         try {
-            statement = "SELECT * FROM customer WHERE email = " + email;
+            statement = "SELECT * FROM customer WHERE email = " +
+                    (email == null ? null : "'" + email.replaceAll("'","''") + "'") + ";";
             executeQuery(statement);
             if (resultSet.next()) {
                 setEmployeeFromQuery(customer);

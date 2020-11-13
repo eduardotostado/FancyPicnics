@@ -92,5 +92,7 @@ public class AddUserController extends Controller implements Initializable {
         }
         comboBox1.setItems(employeeObservableList);
     }
+
+    
 }
 

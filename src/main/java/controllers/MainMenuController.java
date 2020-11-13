@@ -12,9 +12,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainMenuController extends Controller implements Initializable {
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         clearSelectedObjects();
         successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Success");
@@ -41,7 +41,15 @@ public class MainMenuController extends Controller implements Initializable {
         loadScene(event, "/views/Employee.fxml", ControllerType.EMPLOYEE);
     }
 
-    public void importEmailsPushed(ActionEvent event) throws IOException{
+    public void importEmailsPushed(ActionEvent event) throws IOException {
         loadScene(event, "/views/Email.fxml", ControllerType.EMAIL);
+    }
+
+    public void eventsEmailsPushed(ActionEvent event) throws IOException {
+        loadScene(event, "/views/Event.fxml", ControllerType.EVENT);
+    }
+
+    public void reportsPushed(ActionEvent event) throws IOException {
+        loadScene(event, "/views/Reports.fxml", ControllerType.REPORTS);
     }
 }

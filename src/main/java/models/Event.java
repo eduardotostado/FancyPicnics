@@ -3,8 +3,9 @@ package models;
 import entities.QueryObject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.sql.SQLException;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,74 +13,93 @@ public class Event extends QueryObject {
 
     private int id;
     private String squareEmailId;
-    private String picnicDateTime;
+    private LocalDateTime picnicDateTime;
     private int invoiceId;
     private int customerId;
-    private int guestCount;
+    private String guestCount;
+    private String eventLocation;
     private String eventAddress;
-    private int eventTypeId;
-    private int addonCount;
-    private int styleCount;
+    private String eventType;
+    private int employeeId;
+    private String googleCalendarId;
+    private String style;
+    private String customPalette;
 
-    public Event(int id, String squareEmailId, String picnicDateTime, int invoiceId, int customerId, int guestCount, String eventAddress, int eventTypeId, int addonCount, int styleCount) {
-        setId(id);
-        setSquareEmailId(squareEmailId);
-        setPicnicDateTime(picnicDateTime);
-        setInvoiceId(invoiceId);
-        setCustomerId(customerId);
-        setGuestCount(guestCount);
-        setEventAddress(eventAddress);
-        setEventTypeId(eventTypeId);
-        setAddonCount(addonCount);
-        setStyleCount(styleCount);
+    private Customer customer;
+    private List<InvoiceItem> invoiceItemList;
+    private Invoice invoice;
+
+    public Event(int id, String squareEmailId, LocalDateTime picnicDateTime, int invoiceId, int customerId, String guestCount, String eventLocation, String eventAddress, String eventType, int employeeId, String googleCalendarId, String style, String customPalette) {
+        this.id = id;
+        this.squareEmailId = squareEmailId;
+        this.picnicDateTime = picnicDateTime;
+        this.invoiceId = invoiceId;
+        this.customerId = customerId;
+        this.guestCount = guestCount;
+        this.eventLocation = eventLocation;
+        this.eventAddress = eventAddress;
+        this.eventType = eventType;
+        this.employeeId = employeeId;
+        this.googleCalendarId = googleCalendarId;
+        this.style = style;
+        this.customPalette = customPalette;
     }
 
-    public Event(){
+    public Event() {
     }
 
-    public boolean edit(){
+    public boolean edit() {
 
         statement = "UPDATE event " +
                 "SET " +
-                "square_email_id = '" + this.getSquareEmailId() +  "' " +
-                "picnic_date_time = '" + this.getPicnicDateTime() +  "' " +
-                "invoice_id = " + this.getInvoiceId() +  " " +
-                "customer_id = " + this.getCustomerId() +  " " +
-                "guest_count = " + this.getGuestCount() +  " " +
-                "event_address = '" + this.getEventAddress() +  "' " +
-                "event_type_id = " + this.getEventTypeId() +  " " +
-                "addon_count = " + this.getAddonCount() +  " " +
-                "style_count = " + this.getStyleCount() +  " " +
+                "square_email_id = " + (this.getSquareEmailId() == null ? this.getSquareEmailId() : "'" + this.getSquareEmailId().replaceAll("'", "''") + "'") + ", " +
+                "picnic_date_time = '" + this.getPicnicDateTimeString() + "', " +
+                "invoice_id = " + this.getInvoiceId() + ", " +
+                "customer_id = " + this.getCustomerId() + ", " +
+                "guest_count = " + (this.getGuestCount() == null ? this.getGuestCount() : "'" + this.getGuestCount().replaceAll("'", "''") + "'") + ", " +
+                "event_location = " + (this.getEventLocation() == null ? this.getEventLocation() : "'" + this.getEventLocation().replaceAll("'", "''") + "'") + ", " +
+                "event_address = " + (this.getEventAddress() == null ? this.getEventAddress() : "'" + this.getEventAddress().replaceAll("'", "''") + "'") + ", " +
+                "event_type = " + (this.getEventType() == null ? this.getEventType() : "'" + this.getEventType().replaceAll("'", "''") + "'") + ", " +
+                "employee_id = " + (this.getEmployeeId() == 0 ? "null" : this.getEmployeeId()) + ", " +
+                "google_calendar_id = " + (this.getGoogleCalendarId() == null ? this.getGoogleCalendarId() : "'" + this.getGoogleCalendarId().replaceAll("'", "''") + "'") + ", " +
+                "style = " + (this.getStyle() == null ? this.getStyle() : "'" + this.getStyle().replaceAll("'", "''") + "'") + ", " +
+                "custom_palette = " + (this.getCustomPalette() == null ? this.getCustomPalette() : "'" + this.getCustomPalette().replaceAll("'", "''") + "'") + " " +
                 "WHERE id = " + this.getId();
 
         return executeUpdate(statement);
     }
 
-    public boolean add(){
-        statement = "INSERT INTO event (square_email_id, picnic_date_time, invoice_id, customer_id, guest_count, event_address, event_type_id, addon_count, style_count) VALUES ('" +
-                this.getSquareEmailId() + ", '" + this.getPicnicDateTime() + "', " + this.getInvoiceId() + ", " + this.getCustomerId() + ", " + this.getGuestCount() + ", '" + this.getEventAddress() + "', " + this.getEventTypeId() + ", " + this.getAddonCount() + ", " + this.getStyleCount() +
-                "')";
+    public boolean add() {
+        statement = "Insert INTO event (square_email_id, picnic_date_time, invoice_id, customer_id, guest_count, event_location, event_address, event_type, employee_id, google_calendar_id, custom_palette, style)  VALUES (" +
+                (this.getSquareEmailId() == null ? this.getSquareEmailId() : "'" + this.getSquareEmailId().replaceAll("'", "''") + "'") + ", " +
+                "'" + this.getPicnicDateTimeString() + "', " +
+                this.getInvoiceId() + ", " +
+                this.getCustomerId() + ", " +
+                (this.getGuestCount() == null ? this.getGuestCount() : "'" + this.getGuestCount().replaceAll("'", "''") + "'") + ", " +
+                (this.getEventLocation() == null ? this.getEventLocation() : "'" + this.getEventLocation().replaceAll("'", "''") + "'") + ", " +
+                (this.getEventAddress() == null ? this.getEventAddress() : "'" + this.getEventAddress().replaceAll("'", "''") + "'") + ", " +
+                (this.getEventType() == null ? this.getEventType() : "'" + this.getEventType().replaceAll("'", "''") + "'") + ", " +
+                (this.getEmployeeId() == 0 ? "null" : this.getEmployeeId()) + ", " +
+                (this.getGoogleCalendarId() == null ? this.getGoogleCalendarId() : "'" + this.getGoogleCalendarId().replaceAll("'", "''") + "'") + ", " +
+                (this.getCustomPalette() == null ? this.getCustomPalette() : "'" + this.getCustomPalette().replaceAll("'", "''") + "'") + ", " +
+                (this.getStyle() == null ? this.getStyle() : "'" + this.getStyle().replaceAll("'", "''") + "'") +
+                ")";
 
         return executeUpdate(statement);
     }
 
-    /* Disabled because we don't want to delete customers given that they might be referenced in other tables.
-     private boolean delete(){
-        statement =
-                "DELETE FROM employee WHERE id = " +
-                        this.getID();
-        return executeUpdate(statement);
-    }
-    */
-
-    public static ObservableList<Event> findAll(){
+    public static ObservableList<Event> findAllForTable(LocalDate fromDate, LocalDate toDate) {
         List<Event> events = new ArrayList<>();
         try {
-            statement = "SELECT * FROM event";
+            statement = "SELECT e.id as event_id, square_email_id, picnic_date_time, invoice_id, customer_id, guest_count, event_address, event_type, employee_id, google_calendar_id, custom_palette, style, event_location, c.id as customer_table_id, name, phone, source, email, i.id as invoice_table_id, subtotal, tax_rate, is_paid, total, square_invoice_id, discount_percentage\n" +
+                    "FROM event e\n" +
+                    "JOIN customer c on e.customer_id = c.id\n" +
+                    "JOIN invoice i on i.id = e.invoice_id\n" +
+                    "WHERE picnic_date_time BETWEEN '" + fromDate.toString() + "' AND '" + toDate.toString() + "';";
             executeQuery(statement);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 Event event = new Event();
-                setEmployeeFromQuery(event);
+                setEventFromQuery(event);
                 events.add(event);
             }
         } catch (SQLException e) {
@@ -90,13 +110,14 @@ public class Event extends QueryObject {
         return FXCollections.observableList(events);
     }
 
-    public static Event findByID(int id){
+
+    public static Event findByID(int id) {
         Event event = new Event();
         try {
             statement = "SELECT * FROM event WHERE id = " + id;
             executeQuery(statement);
             if (resultSet.next()) {
-                setEmployeeFromQuery(event);
+                setEventFromQuery(event);
             } else {
                 event = null;
             }
@@ -124,12 +145,22 @@ public class Event extends QueryObject {
         this.squareEmailId = squareEmailId;
     }
 
-    public String getPicnicDateTime() {
+    public LocalDateTime getPicnicDateTime() {
         return picnicDateTime;
     }
 
-    public void setPicnicDateTime(String picnicDateTime) {
+    public void setPicnicDateTime(LocalDateTime picnicDateTime) {
         this.picnicDateTime = picnicDateTime;
+    }
+
+    public String getPicnicDateTimeString(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss");
+        return picnicDateTime.format(formatter);
+    }
+
+    public String getPicnicTimeString(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return picnicDateTime.format(formatter);
     }
 
     public int getInvoiceId() {
@@ -148,12 +179,20 @@ public class Event extends QueryObject {
         this.customerId = customerId;
     }
 
-    public int getGuestCount() {
+    public String getGuestCount() {
         return guestCount;
     }
 
-    public void setGuestCount(int guestCount) {
+    public void setGuestCount(String guestCount) {
         this.guestCount = guestCount;
+    }
+
+    public String getEventLocation() {
+        return eventLocation;
+    }
+
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation;
     }
 
     public String getEventAddress() {
@@ -164,52 +203,130 @@ public class Event extends QueryObject {
         this.eventAddress = eventAddress;
     }
 
-    public int getEventTypeId() {
-        return eventTypeId;
+    public String getEventType() {
+        return eventType;
     }
 
-    public void setEventTypeId(int eventTypeId) {
-        this.eventTypeId = eventTypeId;
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 
-    public int getAddonCount() {
-        return addonCount;
+    public int getEmployeeId() {
+        return employeeId;
     }
 
-    public void setAddonCount(int addonCount) {
-        this.addonCount = addonCount;
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
     }
 
-    public int getStyleCount() {
-        return styleCount;
+    public String getGoogleCalendarId() {
+        return googleCalendarId;
     }
 
-    public void setStyleCount(int styleCount) {
-        this.styleCount = styleCount;
+    public void setGoogleCalendarId(String googleCalendarId) {
+        this.googleCalendarId = googleCalendarId;
+    }
+
+    public String getStyle() {
+        return style;
+    }
+
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
+    public String getCustomPalette() {
+        return customPalette;
+    }
+
+    public void setCustomPalette(String customPalette) {
+        this.customPalette = customPalette;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public List<InvoiceItem> getInvoiceItemList() {
+        return invoiceItemList;
+    }
+
+    public void setInvoiceItemList(List<InvoiceItem> invoiceItemList) {
+        this.invoiceItemList = invoiceItemList;
+    }
+
+    public Invoice getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+    }
+
+    public String getCustomerName(){
+        return getCustomer().getName();
+    }
+
+    public String getCustomerEmail(){
+        return getCustomer().getEmail();
+    }
+
+    public String getCustomerPhone(){
+        return getCustomer().getPhone();
+    }
+
+    public Float getInvoiceTotal(){
+        return getInvoice().getTotal();
     }
 
     public boolean exists() {
         return (findByID(this.id) != null);
     }
 
-    public void getIDFromDB(){
+    public void getIDFromDB() {
         setId(getLastID("event"));
     }
 
-    private static void setEmployeeFromQuery(Event event) throws SQLException {
-        event.setId(resultSet.getInt("id"));
+    private static void setEventFromQuery(Event event) throws SQLException {
+        event.setId(resultSet.getInt("event_id"));
         event.setSquareEmailId(resultSet.getString("square_email_id"));
-        event.setPicnicDateTime(resultSet.getString("picnic_date_time"));
+        event.setPicnicDateTime(resultSet.getTimestamp("picnic_date_time").toLocalDateTime());
         event.setInvoiceId(resultSet.getInt("invoice_id"));
         event.setCustomerId(resultSet.getInt("customer_id"));
-        event.setGuestCount(resultSet.getInt("guest_count"));
+        event.setGuestCount(resultSet.getString("guest_count"));
+        event.setEventLocation(resultSet.getString("event_location"));
         event.setEventAddress(resultSet.getString("event_address"));
-        event.setEventTypeId(resultSet.getInt("event_type_id"));
-        event.setAddonCount(resultSet.getInt("addon_count"));
-        event.setStyleCount(resultSet.getInt("style_count"));
+        event.setEventType(resultSet.getString("event_type"));
+        event.setEmployeeId(resultSet.getInt("employee_id"));
+        event.setGoogleCalendarId(resultSet.getString("google_calendar_id"));
+        event.setStyle(resultSet.getString("style"));
+        event.setCustomPalette(resultSet.getString("custom_palette"));
+
+        Customer customer = new Customer();
+        customer.setID(resultSet.getInt("customer_table_id"));
+        customer.setName(resultSet.getString("name"));
+        customer.setPhone(resultSet.getString("phone"));
+        customer.setSource(resultSet.getString("source"));
+        customer.setEmail(resultSet.getString("email"));
+        event.setCustomer(customer);
+
+        Invoice invoice = new Invoice();
+        invoice.setID(resultSet.getInt("invoice_table_id"));
+        invoice.setSubtotal(resultSet.getFloat("subtotal"));
+        invoice.setTaxRate(resultSet.getFloat("tax_rate"));
+        invoice.setIsPaid(resultSet.getBoolean("is_paid"));
+        invoice.setTotal(resultSet.getFloat("total"));
+        invoice.setSquareInvoiceID(resultSet.getString("square_invoice_id"));
+        invoice.setDiscountPercentage(resultSet.getDouble("discount_percentage"));
+
+        event.setInvoice(invoice);
     }
 
-    public static int getChecksum(){
+    public static int getChecksum() {
         return getChecksum("event");
     }
 }

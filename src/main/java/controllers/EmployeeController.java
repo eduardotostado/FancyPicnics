@@ -34,7 +34,6 @@ public class EmployeeController extends Controller implements Initializable {
         // Loads the data into the TableView and ComboBox
         loadData();
 
-        // When a row is selected, populates the text fields with the information from the row.
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedObject = newSelection;

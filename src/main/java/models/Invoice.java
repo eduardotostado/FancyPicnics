@@ -11,18 +11,21 @@ import java.util.List;
 public class Invoice extends QueryObject {
 
     private int id;
-
     private Float subtotal;
     private Float taxRate;
     private Float total;
-    private boolean isPayed;
+    private boolean isPaid;
+    private String squareInvoiceID;
+    private Double discountPercentage;
 
-    public Invoice(int id, Float subtotal, Float taxRate, Float total, boolean isPayed) {
-        setID(id);
-        setSubtotal(subtotal);
-        setTaxRate(taxRate);
-        setTotal(total);
-        setIsPayed(isPayed);
+    public Invoice(int id, Float subtotal, Float taxRate, Float total, boolean isPaid, String squareInvoiceID, Double discountPercentage) {
+        this.id = id;
+        this.subtotal = subtotal;
+        this.taxRate = taxRate;
+        this.total = total;
+        this.isPaid = isPaid;
+        this.squareInvoiceID = squareInvoiceID;
+        this.discountPercentage = discountPercentage;
     }
 
     public Invoice(){
@@ -32,31 +35,30 @@ public class Invoice extends QueryObject {
 
         statement = "UPDATE invoice " +
                 "SET " +
-                "subtotal = '" + this.getSubtotal() +  "', " +
-                "tax_rate = '" + this.getTaxRate() +  "', " +
-                "is_payed = " + this.getIsPayed() +  ", " +
-                "total = '" + this.getTotal() +  "', " +
+                "subtotal = " + this.getSubtotal() +  ", " +
+                "tax_rate = " + this.getTaxRate() +  ", " +
+                "is_paid = " + this.getIsPaidBit() +  ", " +
+                "total = " + this.getTotal() +  ", " +
+                "square_invoice_id = " + (this.getSquareInvoiceID() == null ? this.getSquareInvoiceID() : "'" + this.getSquareInvoiceID().replaceAll("'", "''") + "'") + ", " +
+                "discount_percentage = " + this.getDiscountPercentage() +  " " +
                 "WHERE id = " + this.getID();
 
         return executeUpdate(statement);
     }
 
     public boolean add(){
-        statement = "INSERT INTO invoice (subtotal, tax_rate, is_payed, total) VALUES ('" +
-                this.getSubtotal() + "', '" + this.getTaxRate() + "', " + this.getIsPayed() + ", '" + this.getTotal() +
-                "')";
+        statement = "INSERT INTO invoice (id, subtotal, tax_rate, is_paid, total, square_invoice_id, discount_percentage) VALUES (" +
+                this.getID() + ", " +
+                this.getSubtotal() + ", " +
+                this.getTaxRate() + ", " +
+                this.getIsPaidBit() + ", " +
+                this.getTotal() + ", " +
+                (this.getSquareInvoiceID() == null ? this.getSquareInvoiceID() : "'" + this.getSquareInvoiceID().replaceAll("'", "''") + "'") + ", " +
+                this.getDiscountPercentage() +
+                ")";
 
         return executeUpdate(statement);
     }
-
-    /* Disabled because we don't want to delete customers given that they might be referenced in other tables.
-     private boolean delete(){
-        statement =
-                "DELETE FROM employee WHERE id = " +
-                        this.getID();
-        return executeUpdate(statement);
-    }
-    */
 
     public static ObservableList<Invoice> findAll(){
         List<Invoice> invoices = new ArrayList<>();
@@ -102,6 +104,31 @@ public class Invoice extends QueryObject {
         this.id = id;
     }
 
+    public int getNewIDFromDB() {
+        int result = -1;
+        try {
+            statement = "SELECT NEXT VALUE FOR invoice_id_sequence";
+            executeQuery(statement);
+            if (resultSet.next()) {
+                result = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            terminateQuery();
+        }
+
+        return result;
+    }
+
+    public Double getDiscountPercentage() {
+        return discountPercentage;
+    }
+
+    public void setDiscountPercentage(Double discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
     public Float getSubtotal() {
         return subtotal;
     }
@@ -119,19 +146,31 @@ public class Invoice extends QueryObject {
     }
 
     public Float getTotal() {
-        return total;
+        return this.total;
     }
 
     public void setTotal(Float total) {
         this.total = total;
     }
 
-    public boolean getIsPayed() {
-        return isPayed;
+    public boolean getIsPaid() {
+        return isPaid;
     }
 
-    public void setIsPayed(boolean payed) {
-        isPayed = payed;
+    public void setIsPaid(boolean isPaid) {
+        this.isPaid = isPaid;
+    }
+
+    public int getIsPaidBit(){
+        return isPaid ? 1 : 0;
+    }
+
+    public String getSquareInvoiceID() {
+        return squareInvoiceID;
+    }
+
+    public void setSquareInvoiceID(String squareInvoiceID) {
+        this.squareInvoiceID = squareInvoiceID;
     }
 
     public boolean exists() {
@@ -146,8 +185,10 @@ public class Invoice extends QueryObject {
         invoice.setID(resultSet.getInt("id"));
         invoice.setSubtotal(resultSet.getFloat("subtotal"));
         invoice.setTaxRate(resultSet.getFloat("tax_rate"));
-        invoice.setIsPayed(resultSet.getBoolean("is_payed"));
-        invoice.setTaxRate(resultSet.getFloat("total"));
+        invoice.setIsPaid(resultSet.getBoolean("is_paid"));
+        invoice.setTotal(resultSet.getFloat("total"));
+        invoice.setSquareInvoiceID(resultSet.getString("square_invoice_id"));
+        invoice.setDiscountPercentage(resultSet.getDouble("discount_percentage"));
     }
 
     public static int getChecksum(){
