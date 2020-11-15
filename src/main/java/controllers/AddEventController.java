@@ -48,8 +48,8 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class AddEventController extends Controller implements Initializable{
 
     private final float TAX_RATE = 6.25f;
-    private final String LOCATION_ID = "4Y2RSJHP22YNJ";
-    private final String ACCESS_TOKEN = "EAAAEOW91CrQRyYWRf3plX_j0fJ1abT18SVTi6qSlrK25SMqyzLYmEpN2Sd3D7H4";
+    private final String LOCATION_ID = "*********";
+    private final String ACCESS_TOKEN = "********";
 
     @FXML private Label label1;
 
